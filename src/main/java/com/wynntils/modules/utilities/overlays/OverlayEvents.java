@@ -526,16 +526,23 @@ public class OverlayEvents implements Listener {
                 }
                 return;
             }
-
+        }
+        
+        // Handles loot chest messages
+        if (OverlayConfig.ConsumableTimer.INSTANCE.showCooldown || OverlayConfig.GameUpdate.RedirectSystemMessages.INSTANCE.redirectCooldown) {
             Matcher matcher = CHEST_COOLDOWN_PATTERN.matcher(messageText);
             if (matcher.find()) {
                 int minutes = Integer.parseInt(matcher.group(1));
-                GameUpdateOverlay.queueMessage("Wait " + minutes + " minutes for loot chest");
-                e.setCanceled(true);
-
-                if (OverlayConfig.ConsumableTimer.INSTANCE.showCooldown) {
-                    ConsumableTimerOverlay.addBasicTimer("Loot cooldown", minutes*60, true);
+                
+                // Consumable timer overlays
+                if (OverlayConfig.ConsumableTimer.INSTANCE.showCooldown) ConsumableTimerOverlay.addBasicTimer("Loot cooldown", minutes*60, true);
+                
+                // Update ticker message redirect
+                if (OverlayConfig.GameUpdate.RedirectSystemMessages.INSTANCE.redirectCooldown) {
+                    GameUpdateOverlay.queueMessage("Wait " + minutes + " minutes for loot chest");
+                    e.setCanceled(true);
                 }
+               
                 return;
             }
         }

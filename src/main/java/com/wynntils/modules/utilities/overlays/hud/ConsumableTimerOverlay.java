@@ -7,7 +7,6 @@ package com.wynntils.modules.utilities.overlays.hud;
 import com.wynntils.core.framework.enums.SkillPoint;
 import com.wynntils.core.framework.enums.SpellType;
 import com.wynntils.core.framework.overlays.Overlay;
-import com.wynntils.core.framework.rendering.SmartFontRenderer;
 import com.wynntils.core.framework.rendering.colors.CommonColors;
 import com.wynntils.core.utils.ItemUtils;
 import com.wynntils.core.utils.StringUtils;
@@ -238,6 +237,20 @@ public class ConsumableTimerOverlay extends Overlay {
         event.setCanceled(false);
 
         if (activeConsumables.isEmpty()) return;
+        
+        // Determine text start location
+        int textOrigin = 0;
+        switch (OverlayConfig.ConsumableTimer.INSTANCE.textAlignment) {
+            case LEFT_RIGHT: 
+                textOrigin = -staticSize.x;
+                break;
+            case MIDDLE:
+                textOrigin = -staticSize.x / 2;
+                break;
+            case RIGHT_LEFT:
+                textOrigin = 0;
+                break;
+        }
 
         Iterator<ConsumableContainer> it = activeConsumables.iterator();
 
@@ -251,8 +264,10 @@ public class ConsumableTimerOverlay extends Overlay {
                 continue;
             }
 
-            drawString(consumable.getName() + " (" + StringUtils.timeLeft(consumable.getExpirationTime() - Minecraft.getSystemTime()) + ")"
-                    , 0, extraY, CommonColors.WHITE, getAlignment(), SmartFontRenderer.TextShadow.OUTLINE);
+            String formatted = OverlayConfig.ConsumableTimer.INSTANCE.format
+                .replace("%name%", consumable.getName())
+                .replace("%remaining%", StringUtils.timeLeft(consumable.getExpirationTime() - Minecraft.getSystemTime()));
+            drawString(formatted, textOrigin, extraY, CommonColors.WHITE, OverlayConfig.ConsumableTimer.INSTANCE.textAlignment, OverlayConfig.ConsumableTimer.INSTANCE.textShadow);
 
             extraY+=10;
         }
@@ -262,7 +277,7 @@ public class ConsumableTimerOverlay extends Overlay {
         extraY+=10;
 
         for (Map.Entry<String, IdentificationHolder> entry : activeEffects.entrySet()) {
-            drawString(entry.getValue().getAsLore(entry.getKey()), 0, extraY, CommonColors.WHITE, getAlignment(), SmartFontRenderer.TextShadow.OUTLINE);
+            drawString(entry.getValue().getAsLore(entry.getKey()), textOrigin, extraY, CommonColors.WHITE, OverlayConfig.ConsumableTimer.INSTANCE.textAlignment, OverlayConfig.ConsumableTimer.INSTANCE.textShadow);
 
             extraY += 10;
         }
